@@ -4,14 +4,33 @@ const getBooks = async (req, res) => {
   try {
     const books = await Book.find();
     if (books) {
-      res.status(200).send({
-        success: true,
-        books,
-      });
+      res.status(200).json(books);
     } else {
       res.status(503).send({
         success: false,
         message: "Books not found",
+        error: error.message,
+      });
+    }
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+const getBook = async (req, res) => {
+  const id = req.params.id
+  try {
+    const book = await Book.findOne({_id:id});
+    if (book) {
+      res.status(200).json(book);
+    } else {
+      res.status(503).send({
+        success: false,
+        message: "Book not found",
         error: error.message,
       });
     }
@@ -100,4 +119,4 @@ const deleteBook = async (req, res) => {
   }
 };
 
-export { getBooks, createBook, editBook, deleteBook };
+export { getBooks, getBook, createBook, editBook, deleteBook };
