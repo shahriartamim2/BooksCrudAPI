@@ -56,41 +56,42 @@ const createBook = async (req, res, next) => {
 const editBook = async (req, res, next) => {
   try {
     const id = req.params.id;
-    // if(name||author||publishYear||description){
-    //   return res.status(500).send({message:"Send required changes"})
+    if (!id) {
+      return res.status(400).send({ message: "Book ID is required" });
+    }
+
+    // Uncomment and modify the below code if you want to enforce certain fields in the request body
+    // const { name, author, publishYear, description } = req.body;
+    // if (!name && !author && !publishYear && !description) {
+    //   return res.status(400).send({ message: "Send required changes" });
     // }
-    const result = Book.findByIdAndUpdate(id,req.body)
+
+    const result = await Book.findByIdAndUpdate(id, req.body, { new: true });
     if (!result) {
-      return res.status(500).send({ message: "Book not found" });
+      return res.status(404).send({ message: "Book not found" });
     } else {
-      return res.status(200).send({ message: " Successfully Book Updated ",
-        data:result
-       });
+      return res
+        .status(200)
+        .send({ message: "Book successfully updated", data: result });
     }
   } catch (error) {
-    res.status(500).send({
+    return res.status(500).send({
       message: "Internal server error",
-      error: error,
+      error: error.message || error,
     });
   }
 };
 
+
 const deleteBook = async (req, res) => {
   try {
     const id = req.params.id;
-    const book = await Book.deleteOne({ _id: id })
-      .then(() =>
-        res.status(200).send({
-          success: true,
-          book
-        })
-      )
-      .catch((err) =>
-        res.status(401).send({
-          success: false,
-          error: err,
-        })
-      );
+     const result = await Book.findByIdAndDelete(id);
+    if (!result) {
+      return res.status(404).send({ message: "Book not found" });
+    } else {
+      return res.status(200).send({ message: "Book successfully deleted", data: result });
+    }
   } catch (error) {
     res.status(500).send({
       message: "Internal server error",
